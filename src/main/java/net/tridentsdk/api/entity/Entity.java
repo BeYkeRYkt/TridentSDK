@@ -1,30 +1,19 @@
 /*
- * Copyright (c) 2014, The TridentSDK Team
- * All rights reserved.
+ * Trident - A Multithreaded Server Alternative
+ * Copyright 2014 The TridentSDK Team
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     1. Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *     2. Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *     3. Neither the name of the The TridentSDK Team nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL The TridentSDK Team BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package net.tridentsdk.api.entity;
 
 import net.tridentsdk.api.Location;
@@ -97,20 +86,6 @@ public interface Entity {
     void tick();
 
     /**
-     * Makes the specified entity invisible to the current entity
-     *
-     * @param entity the entity to make invisible to this entity
-     */
-    void hide(Entity entity);
-
-    /**
-     * Un-hides the entity that was hidden from view, or does nothing of already visible
-     *
-     * @param entity the entity to make visible to this entity
-     */
-    void show(Entity entity);
-
-    /**
      * Checks if the entity is currently on the ground, or at least touching the ground
      *
      * @return {@code true} if the entity touches the ground, {@code false} if it is in the air (such as if it was
@@ -127,9 +102,45 @@ public interface Entity {
     List<Entity> getNearbyEntities(double radius);
 
     /**
-     * The identifier for this entity
+     * Gets the display name for the entity, used on inventories and deaths
      *
-     * @return the UUID object unique to all entities on the server
+     * @return Display name
+     */
+    String getDisplayName();
+
+    /**
+     * Sets the entity's display name, effects inventories (if applicable) and death messages
+     *
+     * @param name Entity name
+     */
+    void setDisplayName(String name);
+
+    /**
+     * Gets if the entity's display name visible
+     *
+     * @return if the entity's display name visible
+     */
+    boolean isNameVisible();
+
+    /**
+     * Gets if the entity is silent (sounds)
+     *
+     * @return if the entity is silent
+     */
+    boolean isSilent();
+
+    /**
+     * The identifier for this entity for runtime, see getUniqueId for a set id of the entity
+     *
+     * @return the id to all entities on the server at runtime
+     * @see net.tridentsdk.api.entity.Entity#getUniqueId()
+     */
+    int getId();
+
+    /**
+     * The unique id for the entity to the server
+     *
+     * @return The unique id for the entity
      */
     UUID getUniqueId();
 
@@ -137,14 +148,6 @@ public interface Entity {
      * Removes the entity from the world and destroys it, freeing all memory associated with it
      */
     void remove();
-
-    /**
-     * Checks if the entity has died, or has 0 health. Should only apply to entities that are "live" (TODO
-     * LivingEntity)
-     *
-     * @return {@code true} if the entity is dead, {@code false} if it is alive
-     */
-    boolean isDead();
 
     /**
      * Gets the entity that is riding this entity, if there is any
@@ -171,4 +174,11 @@ public interface Entity {
      * @return the entity type that is represented
      */
     EntityType getType();
+
+    /**
+     * Sets the properties of this entity to the specified properties
+     *
+     * @param properties the properties to set
+     */
+    void applyProperties(EntityProperties properties);
 }

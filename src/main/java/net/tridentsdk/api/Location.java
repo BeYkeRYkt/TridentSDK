@@ -1,45 +1,31 @@
 /*
- * Copyright (c) 2014, The TridentSDK Team
- * All rights reserved.
+ * Trident - A Multithreaded Server Alternative
+ * Copyright 2014 The TridentSDK Team
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     1. Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *     2. Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *     3. Neither the name of the The TridentSDK Team nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL The TridentSDK Team BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package net.tridentsdk.api;
 
+import com.google.common.base.Preconditions;
 import net.tridentsdk.api.util.Vector;
 import net.tridentsdk.api.world.World;
-
-import java.io.Serializable;
 
 /**
  * Represents a point on the coordinate grid of the world
  *
  * @author The TridentSDK Team
  */
-public class Location implements Serializable, Cloneable {
-    private static final long serialVersionUID = 142870546231866867L;
-
+public class Location implements Cloneable {
     private double x;
     private double y;
     private double z;
@@ -80,6 +66,10 @@ public class Location implements Serializable, Cloneable {
      */
     public Location(World world, double x, double y, double z) {
         this(world, x, y, z, 0.0F, 0.0F);
+    }
+
+    private static double square(double d) {
+        return d * d;
     }
 
     /**
@@ -190,16 +180,62 @@ public class Location implements Serializable, Cloneable {
         this.pitch = pitch;
     }
 
+    /**
+     * Adds a vector to this location, returning this locacion
+     * @param vector the vector to add
+     * @return this
+     */
     public Location add(Vector vector) {
-        this.setX(vector.getX());
-        this.setY(vector.getY());
-        this.setZ(vector.getZ());
+        this.setX(this.getX() + vector.getX());
+        this.setY(this.getY() + vector.getY());
+        this.setZ(this.getZ() + vector.getZ());
 
         return this;
     }
 
     public Location getRelative(Vector vector) {
         return new Location(this.getWorld(), vector.getX() + this.getX(), vector.getY() + this.getY(),
-                            vector.getZ() + this.getZ(), this.getYaw(), this.getPitch());
+                vector.getZ() + this.getZ(), this.getYaw(), this.getPitch());
+    }
+
+    /**
+     * Creates new Vector with Location's coordinates
+     *
+     * @return New Vector containing this Location's coordinates
+     */
+    public Vector toVector() {
+        return new Vector(this.getX(), this.getY(), this.getZ());
+    }
+
+    /**
+     * The distance this from location to another. Math.sqrt is costly, ergo calling this method a lot is not advised.
+     *
+     * @param location the location to measure distance with
+     * @return distance from this location to another
+     */
+    public double distance(Location location) {
+        return Math.sqrt(this.distanceSquared(location));
+    }
+
+    /**
+     * The distance squared from this location to another
+     *
+     * @param location the location to measure distance with
+     * @return distance squared from this location to another
+     */
+    public double distanceSquared(Location location) {
+        Preconditions.checkNotNull(location, "Location cannot be null.");
+        if (!this.getWorld().equals(location.getWorld())) return 0.0;
+        return square(this.getX() - location.getX()) + square(this.getY() - location.getY()) +
+                square(this.getZ() - location.getZ());
+    }
+
+    @Override
+    public Location clone() {
+        try {
+            return (Location) super.clone();
+        } catch (CloneNotSupportedException ignored) {
+            return null;
+        }
     }
 }

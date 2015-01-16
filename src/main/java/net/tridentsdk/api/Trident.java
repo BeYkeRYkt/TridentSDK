@@ -1,33 +1,31 @@
 /*
- * Copyright (c) 2014, The TridentSDK Team
- * All rights reserved.
+ * Trident - A Multithreaded Server Alternative
+ * Copyright 2014 The TridentSDK Team
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     1. Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *     2. Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *     3. Neither the name of the The TridentSDK Team nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL The TridentSDK Team BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package net.tridentsdk.api;
 
 import com.google.common.base.Preconditions;
+import net.tridentsdk.api.config.JsonConfig;
+import net.tridentsdk.api.event.EventHandler;
+import net.tridentsdk.api.util.TridentLogger;
+import net.tridentsdk.api.window.Window;
+import net.tridentsdk.api.world.World;
+import net.tridentsdk.plugin.TridentPluginHandler;
+
+import java.net.InetAddress;
+import java.util.Set;
 
 /**
  * Utility accessor to the {@link net.tridentsdk.api.Server}
@@ -36,8 +34,10 @@ import com.google.common.base.Preconditions;
  */
 public final class Trident {
     private static Server server;
+    private static TridentLogger logger;
 
-    private Trident() {}
+    private Trident() {
+    }
 
     /**
      * Gets the server singleton that is currently running
@@ -45,7 +45,7 @@ public final class Trident {
      * @return the server that is running
      */
     public static Server getServer() {
-        return Trident.server;
+        return server;
     }
 
     /**
@@ -54,15 +54,80 @@ public final class Trident {
      * @param s the server to set
      */
     public static void setServer(Server s) {
-        Preconditions.checkState(Trident.canSet(), "Can only set server instance once!");
-        Trident.server = s;
+        Preconditions.checkState(isTrident(), "Server instance can only be set by TridentSDK!");
+        server = s;
     }
 
-    private static boolean canSet() {
+    public static boolean isTrident() {
         StackTraceElement[] elements = Thread.currentThread().getStackTrace();
         StackTraceElement element = elements[3];
 
-        return "net.tridentsdk.server.TridentServer".equals(element.getClassName()) &&
-               "createServer".equals(element.getMethodName());
+        return element.getClassName().startsWith("net.tridentsdk");
+    }
+
+    /**
+     * Gets the logger which the server is currently using
+     *
+     * @return the logger which is being used
+     */
+    public static TridentLogger getLogger() {
+        return logger;
+    }
+
+    /**
+     * Sets the output console logger
+     *
+     * @param logger the logger to use
+     */
+    public static void setLogger(TridentLogger logger) {
+        Trident.logger = logger;
+    }
+
+    public static int getPort() {
+        return server.getPort();
+    }
+
+    public static void shutdown() {
+        server.shutdown();
+    }
+
+    public static Set<World> getWorlds() {
+        return server.getWorlds();
+    }
+
+    public static InetAddress getServerIp() {
+        return server.getServerIp();
+    }
+
+    public static void addTask(Runnable runnable) {
+        server.addTask(runnable);
+    }
+
+    public static Difficulty getDifficulty() {
+        return server.getDifficulty();
+    }
+
+    public static String getVersion() {
+        return server.getVersion();
+    }
+
+    public static Window getWindow(int id) {
+        return server.getWindow(id);
+    }
+
+    public static EventHandler getEventManager() {
+        return server.getEventManager();
+    }
+
+    public static void sendPluginMessage(String channel, byte... data) {
+        server.sendPluginMessage(channel, data);
+    }
+
+    public static TridentPluginHandler getPluginHandler() {
+        return server.getPluginHandler();
+    }
+
+    public static JsonConfig getConfig() {
+        return server.getConfig();
     }
 }

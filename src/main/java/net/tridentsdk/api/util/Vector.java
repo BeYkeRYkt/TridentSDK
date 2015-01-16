@@ -1,31 +1,23 @@
 /*
- * Copyright (c) 2014, The TridentSDK Team
- * All rights reserved.
+ * Trident - A Multithreaded Server Alternative
+ * Copyright 2014 The TridentSDK Team
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     1. Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *     2. Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *     3. Neither the name of the The TridentSDK Team nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL The TridentSDK Team BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package net.tridentsdk.api.util;
+
+import net.tridentsdk.api.Location;
+import net.tridentsdk.api.world.World;
 
 import java.io.Serializable;
 
@@ -110,7 +102,7 @@ public class Vector implements Serializable, Cloneable {
      */
     public Vector add(int x, int y, int z) {
         return this.add((double) x, (double) y, (double) z);
-        /* Implementation detail:
+        /* TODO: Implementation detail:
         DO NOT CREATE A NEW VECTOR HERE JUST BECAUSE (!)
         Doing so wastes memory and adds unnecessary object
         creation overhead, therefore, delegate to the
@@ -167,6 +159,16 @@ public class Vector implements Serializable, Cloneable {
     }
 
     /**
+     * Multiplies the magnitude of this vector by a double
+     *
+     * @param amount The amount to multiply by
+     * @return This vector, with updated coordinates
+     */
+    public Vector multiply(double amount) {
+        return this.multiply(amount, amount, amount);
+    }
+
+    /**
      * Multiplies the coordinate values to the current vector's coordinates with double accuracy
      *
      * @param x the x value of the vector to multiply
@@ -205,6 +207,16 @@ public class Vector implements Serializable, Cloneable {
     }
 
     /**
+     * Divides the magnitude of this vector by a given amount.
+     *
+     * @param amount The amount to divide by
+     * @return this vector
+     */
+    public Vector divide(double amount) {
+        return this.divide(amount, amount, amount);
+    }
+
+    /**
      * Takes the the current vector's coordinates and divides them from the coordinate values with double accuracy
      *
      * @param x the x value of the vector to divide
@@ -230,6 +242,69 @@ public class Vector implements Serializable, Cloneable {
      */
     public Vector divide(int x, int y, int z) {
         return this.divide((double) x, (double) y, (double) z);
+    }
+
+    /**
+     * Sets the current vector to the crossproduct between this vector and another one
+     *
+     * @param vector the vector to crossproduct with
+     * @return this vector, updated with the crossproduct with the other vector
+     */
+    public Vector crossProduct(Vector vector) {
+        double x = this.x;
+        double y = this.y;
+        double z = this.z;
+
+        this.setX(y * vector.getZ() - vector.getY() * z);
+        this.setY(z * vector.getX() - vector.getZ() - x);
+        this.setZ(x * vector.getY() - vector.getX() * y);
+
+        return this;
+    }
+
+    /**
+     * Gets the square of the magnitude of this vector
+     *
+     * @return The magnitude of this vector, squared
+     */
+    public double magnitudeSquared() {
+        return this.x * this.x + this.y * this.y + this.z * this.z;
+    }
+
+    /**
+     * Gets the magnitude for this vector <p/> Note that this is an expensive operation, and if possible, you should use
+     * magnitudeSquared() instead
+     *
+     * @return The magnitude of this vector
+     */
+    public double magnitude() {
+        return Math.sqrt(this.magnitudeSquared());
+    }
+
+    /**
+     * Normalizes this vector (changes the magnitude to 1 without changing the direction)
+     *
+     * @return This vector
+     */
+    public Vector normalize() {
+        return this.divide(this.magnitude());
+    }
+
+    /**
+     * Calculates the dot product of this vector and another
+     *
+     * @param vec the other vector
+     * @return dot product of the two vectors
+     */
+    public double dotProduct(Vector vec) {
+        return this.x * vec.x + this.y * vec.y + this.z * vec.z;
+    }
+
+    /**
+     * Returns a new location in this world, with the coordinates the x, y, and z values
+     */
+    public Location toLocation(World world) {
+        return new Location(world, this.x, this.y, this.z);
     }
 
     /**
@@ -284,5 +359,19 @@ public class Vector implements Serializable, Cloneable {
      */
     public void setZ(double z) {
         this.z = z;
+    }
+
+    /**
+     * Clones this Vector.
+     *
+     * @return the cloned vector
+     */
+    @Override
+    public Vector clone() {
+        try {
+            return (Vector) super.clone();
+        } catch (CloneNotSupportedException e) {
+            return null;
+        }
     }
 }
